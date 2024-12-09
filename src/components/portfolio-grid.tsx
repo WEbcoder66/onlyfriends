@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
-import { Lock, Play, Volume2, VolumeX, X } from 'lucide-react';
+import { Lock, Play, Volume2, VolumeX, X, MessageCircle } from 'lucide-react';
 
 interface Profile {
   name: string;
@@ -9,7 +9,8 @@ interface Profile {
   bio: string;
   stats: {
     posts: number;
-    followers: string;
+    followers: string | number;
+    fans: number;
   }
 }
 
@@ -33,18 +34,25 @@ const PortfolioGrid: React.FC = () => {
     isOpen: boolean;
   }>({ type: 'photo', src: '', isOpen: false });
 
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  
+  // New states for mock payment system
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
+
   const profile: Profile = {
-    name: "Desiree Black♡",            
-    location: "In Your Mind & In Your Bed",          
-    bio: "👑Ts Romanian Princess👑",  
+    name: "OnlyFriends",
+    location: "only friends allowed",
+    bio: "",
     stats: {
-      posts: 19,               
-      followers: "30.5K",           
-    }           
+      posts: 19,
+      followers: "30.5K",
+      fans: 123 // Example fans count
+    }
   };
 
   const content: ContentItem[] = [
-    // First item - Trailer
     {
       id: 1,
       type: 'video',
@@ -54,7 +62,6 @@ const PortfolioGrid: React.FC = () => {
       duration: '00:30',
       isTrailer: true
     },
-    // Free content (4 more items to make 5 total free)
     {
       id: 2,
       type: 'photo',
@@ -79,7 +86,6 @@ const PortfolioGrid: React.FC = () => {
       thumbnail: '/images/post5.jpg',
       isPremium: false,
     },
-    // Premium content (14 items)
     {
       id: 6,
       type: 'video',
@@ -198,10 +204,19 @@ const PortfolioGrid: React.FC = () => {
     }
   }, [content, activeTab]);
 
+  const handleSubscribe = () => {
+    if (!isSubscribed) {
+      setShowPaymentModal(true);
+    }
+  };
+
+  const canViewContent = (item: ContentItem) => {
+    return !item.isPremium || isSubscribed;
+  };
+
   const handlePremiumContent = () => {
-    const subscribeElement = document.getElementById('subscribe-button');
-    if (subscribeElement) {
-      subscribeElement.scrollIntoView({ behavior: 'smooth' });
+    if (!isSubscribed) {
+      setShowPaymentModal(true);
     }
   };
 
@@ -223,11 +238,22 @@ const PortfolioGrid: React.FC = () => {
     setIsMuted(false);
   };
 
+  const handlePayment = () => {
+    // Simulate payment processing
+    setIsPaymentProcessing(true);
+    setTimeout(() => {
+      setIsPaymentProcessing(false);
+      setIsSubscribed(true);
+      setShowPaymentModal(false);
+      alert('Demo: Payment successful! Content unlocked.');
+    }, 2000);
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Profile Header */}
       <div className="max-w-4xl mx-auto pt-8 px-4">
-        <div className="flex items-center gap-8 mb-6">
+        <div className="flex items-start gap-8 mb-6">
           <div className="w-20 h-20 rounded-full overflow-hidden relative">
             <img 
               src="/images/profile.jpg"
@@ -236,29 +262,45 @@ const PortfolioGrid: React.FC = () => {
             />
           </div>
           <div className="flex-1">
-            <h1 className="text-xl font-normal mb-1">{profile.name}</h1>
+            <div className="flex items-center mb-1 gap-2">
+              <h1 className="text-xl font-normal">{profile.name}</h1>
+              <button 
+                onClick={() => setShowMessageModal(true)}
+                className="bg-black hover:bg-gray-900 text-white py-1.5 px-3 rounded-md text-sm font-medium border border-gray-800 flex items-center gap-1"
+              >
+                <MessageCircle className="w-4 h-4" />
+                Message
+              </button>
+            </div>
             <p className="text-gray-400 text-sm mb-2">{profile.location}</p>
+            <div className="flex gap-8 text-sm">
+              <div className="flex items-center gap-1">
+                <span className="text-gray-400">{profile.stats.posts}</span>
+                <span className="text-gray-400">Posts</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-gray-400">{profile.stats.followers}</span>
+                <span className="text-gray-400">followers</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-gray-400">{profile.stats.fans}</span>
+                <span className="text-gray-400">Fans</span>
+              </div>
+            </div>
           </div>
         </div>
         
-        {/* Stats */}
-        <div className="flex gap-8 mb-6 text-sm">
-          <div className="flex items-center gap-1">
-            <span className="text-gray-400">{profile.stats.posts}</span>
-            <span className="text-gray-400">Posts</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="text-gray-400">{profile.stats.followers}</span>
-            <span className="text-gray-400">followers</span>
-          </div>
+        <div className="flex gap-4 mb-6">
+          <button 
+            id="subscribe-button"
+            onClick={handleSubscribe}
+            className={`flex-1 transition-colors text-white py-2.5 rounded-md text-sm font-medium 
+              ${isSubscribed ? 'bg-gray-600 cursor-default' : 'bg-blue-500 hover:bg-blue-600'}`}
+            disabled={isSubscribed}
+          >
+            {isSubscribed ? 'Subscribed' : 'Subscribe • $9.99/month'}
+          </button>
         </div>
-
-        <button 
-          id="subscribe-button"
-          className="w-full bg-blue-500 hover:bg-blue-600 transition-colors text-white py-2 rounded-md text-sm font-medium mb-4"
-        >
-          Subscribe • Cancel anytime
-        </button>
         
         <p className="text-sm text-gray-400 mb-6">{profile.bio}</p>
       </div>
@@ -303,9 +345,9 @@ const PortfolioGrid: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 pb-8">
         <div className="grid grid-cols-3 gap-1">
           {filteredContent.map((item) => (
-            <div key={item.id} className="relative aspect-square w-full group">
-              <div className="relative w-full h-full">
-                {item.type === 'video' && !item.isPremium ? (
+            <div key={item.id} className="relative aspect-square w-full group overflow-hidden">
+              <div className="relative w-full h-full overflow-hidden">
+                {item.type === 'video' && canViewContent(item) ? (
                   // Video Content
                   <div className="absolute inset-0">
                     {playingVideo === item.id ? (
@@ -361,18 +403,18 @@ const PortfolioGrid: React.FC = () => {
                     </span>
                   </div>
                 ) : (
-                  // Photo Content
+                  // Photo Content or Locked Content
                   <div className="absolute inset-0">
                     <img
                       src={item.thumbnail}
                       alt=""
-                      className={`absolute inset-0 w-full h-full object-cover ${
-                        item.isPremium ? 'blur-xl brightness-50' : 'cursor-pointer'
+                      className={`w-full h-full object-cover ${
+                        !canViewContent(item) ? 'blur-xl brightness-50' : 'cursor-pointer'
                       }`}
                       loading="lazy"
-                      onClick={() => !item.isPremium && openModal('photo', item.thumbnail)}
+                      onClick={() => canViewContent(item) && openModal('photo', item.thumbnail)}
                     />
-                    {item.isPremium && (
+                    {!canViewContent(item) && (
                       <button 
                         onClick={handlePremiumContent}
                         className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 hover:bg-black/50 transition-colors group"
@@ -390,7 +432,6 @@ const PortfolioGrid: React.FC = () => {
           ))}
         </div>
 
-        {/* Empty State */}
         {filteredContent.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-400">No {activeTab} to display</p>
@@ -398,7 +439,7 @@ const PortfolioGrid: React.FC = () => {
         )}
       </div>
 
-      {/* Modal */}
+      {/* Content Modal */}
       {modalContent.isOpen && (
         <div 
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/95"
@@ -434,6 +475,83 @@ const PortfolioGrid: React.FC = () => {
                   className="max-w-full max-h-[90vh] object-contain"
                 />
               </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Message Modal */}
+      {showMessageModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-900 rounded-lg p-6 max-w-md w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium">Message {profile.name}</h3>
+              <button onClick={() => setShowMessageModal(false)}>
+                <X className="w-5 h-5 text-gray-400 hover:text-white" />
+              </button>
+            </div>
+            <div className="mb-4">
+              <textarea 
+                className="w-full bg-gray-800 rounded-md p-3 text-white resize-none h-32"
+                placeholder="Type your message..."
+              />
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowMessageModal(false)}
+                className="flex-1 bg-gray-800 hover:bg-gray-700 text-white py-2 rounded-md"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  alert('Demo: Message sent!');
+                  setShowMessageModal(false);
+                }}
+                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md"
+              >
+                Send
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Modal */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-900 rounded-lg p-6 max-w-sm w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium">Subscribe</h3>
+              <button onClick={() => setShowPaymentModal(false)}>
+                <X className="w-5 h-5 text-gray-400 hover:text-white" />
+              </button>
+            </div>
+            {isPaymentProcessing ? (
+              <div className="flex flex-col items-center">
+                <p className="mb-4">Processing your payment...</p>
+                <div className="w-6 h-6 border-4 border-t-transparent border-white rounded-full animate-spin"></div>
+              </div>
+            ) : (
+              <>
+                <p className="mb-4 text-sm text-gray-300">
+                  This is a recurring subscription at <strong>$9.99/month</strong> until canceled.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowPaymentModal(false)}
+                    className="flex-1 bg-gray-800 hover:bg-gray-700 text-white py-2 rounded-md"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handlePayment}
+                    className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md"
+                  >
+                    Pay
+                  </button>
+                </div>
+              </>
             )}
           </div>
         </div>

@@ -43,7 +43,7 @@ const PortfolioGrid: React.FC = () => {
 
   const profile: Profile = {
     name: "OnlyFriends",
-    location: "I can create a custom site for you, similar to OnlyFriends, with all the essential features you need. Visit brsix.com to get started! Your site will include a secure payment processor, robust security measures, a direct messaging system, account management tools, a subscriber system, and reliable storage for your photos and videos—and much more!",
+    location: "Looking for a platform like OnlyFriends, but without losing 20% of your revenue? I’ll build you a custom membership site with all the features you need—secure (adult-friendly) payment processing, direct messaging with PPV integration and tipping, subscriber management, reliable media storage, and more. Ready to keep more of your earnings? Visit brsix.com and let’s get started!",
     bio: "",
     stats: {
       posts: 19,
